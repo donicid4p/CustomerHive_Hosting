@@ -1,0 +1,69 @@
+networks:
+  laravel:
+    driver: bridge
+
+services:
+  # Servizio Database MySQL
+  database:
+    image: mysql:8.0
+    restart: always
+    container_name: CustomerHive_Database
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_USER
+      - MYSQL_ROOT_PASSWORD
+      - DB_DATABASE
+      - DB_USERNAME
+      - DB_PASSWORD
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    
+    networks:
+      - laravel
+
+  # Servizio Applicazione Laravel
+  app:
+    build: 
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: CustomerHive
+    image: donicid4p/customerhive:1.0.0
+    volumes:
+      #- ./:/var/www/html
+      - chive-storage:/var/www/html/storage
+      - chive-controllers:/var/www/html/app/Http/Controllers
+      - chive-certificates:/var/www/html/docker/certificates
+    #entrypoint: sh -c "sleep 30 && php /var/www/html/artisan migrate && php /var/www/html/artisan db:seed"
+
+    ports:
+      - "80:80"
+
+    restart: unless-stopped
+    networks:
+      - laravel
+    environment:
+      - APP_VERSION=${APP_VERSION}
+      - REGISTRY_URL=${REGISTRY_URL}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - database
+      #database:
+      #  condition: service_healthy
+
+
+
+volumes:
+  mysql-data:
+    driver: local
+  chive-controllers:
+    driver: local
+  chive-storage:
+    driver: local
+  chive-certificates:
+    driver: local
