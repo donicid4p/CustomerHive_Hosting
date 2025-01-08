@@ -1,6 +1,6 @@
 ﻿# CustomerHive_Hosting
 
-## Install
+## Installazione
 
 
 ```bash
@@ -13,7 +13,7 @@ docker-compose exec app php artisan migrate --force
 ```bash
 docker-compose exec app php artisan db:seed
 ```
-## Update
+## Aggiornamento
 
 ```bash
 docker compose down
